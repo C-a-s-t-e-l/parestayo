@@ -214,72 +214,99 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-      const generateReceiptContent = (deliveryName, deliveryAddress) => {
-        const container = document.getElementById('receipt-container');
-        if (!container) return;
-        let total = 0;
-        let receiptHTML = `
-            <div class="receipt-header">
-                <div class="logo">Nutri<span>Prep</span></div>
-                <div>Order Summary</div>
-                <div>${new Date().toLocaleString()}</div>
-            </div>
-            <div class="receipt-delivery-info">
-                <strong>Deliver to:</strong>
-                <p><strong>${deliveryName}</strong></p>
-                <p>${deliveryAddress.replace(/\n/g, '<br>')}</p>
-            </div>
-        `;
-        
-        cart.forEach(item => {
-            const itemTotal = item.price * item.quantity;
-            total += itemTotal;
-            receiptHTML += `
-                <div class="receipt-item with-image">
-                    <img src="${item.image}" alt="${item.name}" class="receipt-item-img">
-                    <div class="receipt-item-info">
-                        <div class="receipt-item-line">
-                            <span>${item.quantity}x ${item.name}</span>
-                            <span>Php ${itemTotal.toFixed(2)}</span>
-                        </div>
-                        ${item.instructions ? `<div class="receipt-item-instructions">Notes: ${item.instructions}</div>` : ''}
-                    </div>
-                </div>
-            `;
-        });
-        
+     const generateReceiptContent = (deliveryName, deliveryAddress, phone, paymentMethod) => {
+    const container = document.getElementById('receipt-container');
+    if (!container) return;
+    let total = 0;
+    
+    
+    let receiptHTML = `
+        <div class="receipt-header">
+            <div class="logo receipt"><img src="images/pares-logo.png" class="pares-logo" alt=""></div>
+            <div>Order Summary</div>
+            <div>${new Date().toLocaleString()}</div>
+        </div>
+        <div class="receipt-delivery-info">
+            <strong>Deliver to:</strong>
+            <p><strong>Name:</strong> ${deliveryName}</p>
+            <p><strong>Address:</strong> ${deliveryAddress.replace(/\n/g, '<br>')}</p>
+            <p><strong>Phone:</strong> ${phone}</p>
+            <p><strong>Payment:</strong> ${paymentMethod}</p>
+        </div>
+    `;
+    
+    cart.forEach(item => {
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
         receiptHTML += `
-            <div class="receipt-total">
-                <span>TOTAL</span>
-                <span>Php ${total.toFixed(2)}</span>
+            <div class="receipt-item with-image">
+                <img src="${item.image}" alt="${item.name}" class="receipt-item-img">
+                <div class="receipt-item-info">
+                    <div class="receipt-item-line">
+                        <span>${item.quantity}x ${item.name}</span>
+                        <span>Php ${itemTotal.toFixed(2)}</span>
+                    </div>
+                    ${item.instructions ? `<div class="receipt-item-instructions">Notes: ${item.instructions}</div>` : ''}
+                </div>
             </div>
         `;
+    });
+    
+    receiptHTML += `
+        <div class="receipt-total">
+            <span>TOTAL</span>
+            <span>Php ${total.toFixed(2)}</span>
+        </div>
+    `;
 
-        container.innerHTML = receiptHTML;
-        container.style.display = 'block';
-    };
+    container.innerHTML = receiptHTML;
+    container.style.display = 'block';
+};
 
-  document.getElementById('confirm-address-btn').addEventListener('click', () => {
+ document.getElementById('delivery-phone').addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+});
+
+document.getElementById('confirm-address-btn').addEventListener('click', () => {
+  
     const nameInput = document.getElementById('delivery-name');
     const addressInput = document.getElementById('delivery-address');
+    const phoneInput = document.getElementById('delivery-phone');
+    const paymentMethod = document.querySelector('input[name="payment-method"]:checked');
+
     const nameError = document.getElementById('name-error');
     const addressError = document.getElementById('address-error');
-
-    const deliveryName = nameInput.value.trim();
-    const deliveryAddress = addressInput.value.trim();
+    const phoneError = document.getElementById('phone-error');
+    const paymentError = document.getElementById('payment-error');
 
     nameError.style.display = 'none';
     addressError.style.display = 'none';
+    phoneError.style.display = 'none';
+    paymentError.style.display = 'none';
 
     let isValid = true;
 
-    if (deliveryName === '') {
+    if (nameInput.value.trim() === '') {
         nameError.style.display = 'block';
+        nameError.style.color = 'red';
         isValid = false;
     }
 
-    if (deliveryAddress === '') {
+    if (addressInput.value.trim() === '') {
         addressError.style.display = 'block';
+        addressError.style.color = 'red';
+        isValid = false;
+    }
+
+    if (phoneInput.value.trim().length !== 11 || isNaN(phoneInput.value.trim())) {
+        phoneError.style.display = 'block';
+        phoneError.style.color = 'red';
+        isValid = false;
+    }
+
+    if (!paymentMethod) {
+        paymentError.style.display = 'block';
+        paymentError.style.color = 'red';
         isValid = false;
     }
 
@@ -287,7 +314,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return; 
     }
     
-    generateReceiptContent(deliveryName, deliveryAddress);
+    const deliveryName = nameInput.value.trim();
+    const deliveryAddress = addressInput.value.trim();
+
+    generateReceiptContent(deliveryName, deliveryAddress, phoneInput.value, paymentMethod.value);
 
     document.getElementById('checkout-address-step').style.display = 'none';
     document.getElementById('checkout-receipt-step').style.display = 'block';
@@ -313,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const link = document.createElement('a');
-            link.download = `NutriPrep_Receipt_${Date.now()}.png`;
+            link.download = `ParesTayo_Receipt_${Date.now()}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
             
