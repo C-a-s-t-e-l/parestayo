@@ -664,7 +664,7 @@ footer {
     margin-bottom: 12px;
 }
 .footer-links a {
-    color: var(--gray);
+    color: var(--light);
     transition: all 0.3s ease;
 }
 .footer-links a:hover {
@@ -673,6 +673,7 @@ footer {
 }
 .social-links {
     display: flex;
+    justify-self: center;
     gap: 15px;
     margin-top: 20px;
 }
@@ -1190,6 +1191,11 @@ footer {
 @media (max-width: 768px) {
     body {
         font-size: 15px;
+    }
+
+    iframe{
+        width: 100%;
+        height: 400px;
     }
     
     section {
