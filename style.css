@@ -128,7 +128,7 @@ header {
     font-family: var(--font-heading);
     color: var(--primary);
     
-    line-height: 1; /* Helps remove any extra vertical space */
+    line-height: 1; 
     padding: 5px 0;
 }
 
@@ -614,9 +614,8 @@ height: 180px;
     color: var(--gray);
 }
 
-/* Style for when the FAQ item is active/open */
 .faq-item.active .faq-answer {
-    max-height: 300px; /* Adjust if answers are very long */
+    max-height: 300px; 
     padding-bottom: 20px;
 }
 
@@ -823,6 +822,26 @@ footer {
     border: 1px solid var(--light-gray);
     font-family: var(--font-body);
     resize: vertical;
+}
+
+.quantity-selector {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.quantity-selector .quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px; 
+}
+
+.quantity-selector .quantity-controls span {
+    font-size: 1.2rem;
+    font-weight: bold;
+    min-width: 20px; 
+    text-align: center;
 }
 #modal-add-to-cart-btn {
     width: 100%;
@@ -1049,7 +1068,6 @@ footer {
 
 
 .receipt-item-instructions {
-    /* Ensure long notes wrap properly */
     white-space: normal;
     overflow-wrap: break-word;
     word-wrap: break-word;

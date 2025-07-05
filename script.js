@@ -1,11 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    function formatPrice(number) {
+  
+  const formattedNumber = number.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+  return `Php ${formattedNumber}`;
+}
+
        
     const faqItems = document.querySelectorAll('.faq-item');
     faqItems.forEach(item => {
         const question = item.querySelector('.faq-question');
         question.addEventListener('click', () => {
-            // Close other open items
             const currentlyActive = document.querySelector('.faq-item.active');
             if (currentlyActive && currentlyActive !== item) {
                 currentlyActive.classList.remove('active');
@@ -76,6 +84,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    const modalQuantityMinus = document.getElementById('modal-quantity-minus');
+const modalQuantityPlus = document.getElementById('modal-quantity-plus');
+const modalQuantityDisplay = document.getElementById('modal-quantity');
+
+modalQuantityPlus.addEventListener('click', () => {
+    let currentQuantity = parseInt(modalQuantityDisplay.textContent);
+    modalQuantityDisplay.textContent = currentQuantity + 1;
+});
+
+modalQuantityMinus.addEventListener('click', () => {
+    let currentQuantity = parseInt(modalQuantityDisplay.textContent);
+    if (currentQuantity > 1) { // Prevent quantity from going below 1
+        modalQuantityDisplay.textContent = currentQuantity - 1;
+    }
+});
+
+
     const populateProductModal = (product) => {
         const modalImg = document.getElementById('modal-product-img');
         const modalTitle = document.getElementById('modal-product-title');
@@ -89,26 +114,37 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modalDesc) modalDesc.textContent = product.description;
         if (modalPrice) modalPrice.textContent = `Php ${product.price.toFixed(2)}`;
         if (extraInstructions) extraInstructions.value = '';
+        if (modalQuantityDisplay) modalQuantityDisplay.textContent = '1';
         if (addToCartBtn) addToCartBtn.dataset.product = JSON.stringify(product);
     };
 
     const modalAddToCartBtn = document.getElementById('modal-add-to-cart-btn');
     if (modalAddToCartBtn) {
-        modalAddToCartBtn.addEventListener('click', (e) => {
-            const product = JSON.parse(e.target.dataset.product);
-            const instructions = document.getElementById('extra-instructions').value.trim();
+    modalAddToCartBtn.addEventListener('click', (e) => {
+        const product = JSON.parse(e.target.dataset.product);
+        const instructions = document.getElementById('extra-instructions').value.trim();
+        const quantity = parseInt(document.getElementById('modal-quantity').textContent);
 
-            addToCart({ ...product, instructions });
-            closeModal();
-        });
+        addToCart({ ...product, instructions }, quantity); 
+        closeModal();
+    });
+}
+    
+    const addToCart = (newItem, quantity) => {
+    const existingItem = cart.find(
+        item => item.name === newItem.name && item.instructions === newItem.instructions
+    );
+
+    if (existingItem) {
+        existingItem.quantity += quantity;
+    } else {
+        newItem.cartItemId = Date.now().toString(); 
+        newItem.quantity = quantity; 
+        cart.push(newItem);
     }
     
-    const addToCart = (newItem) => {
-        newItem.cartItemId = Date.now().toString();
-        newItem.quantity = 1;
-        cart.push(newItem);
-        saveCart();
-    };
+    saveCart(); 
+};
 
     if (cartIcon) {
         cartIcon.addEventListener('click', (e) => {
@@ -158,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
             container.innerHTML += itemHTML;
         });
         
-        totalPriceEl.textContent = `Php ${total.toFixed(2)}`;
+       totalPriceEl.textContent = formatPrice(total);
     };
 
     const cartItemsContainer = document.getElementById('cart-items-container');
@@ -219,7 +255,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!container) return;
     let total = 0;
     
-    
     let receiptHTML = `
         <div class="receipt-header">
             <div class="logo receipt"><img src="images/pares-logo.png" class="pares-logo" alt=""></div>
@@ -244,7 +279,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="receipt-item-info">
                     <div class="receipt-item-line">
                         <span>${item.quantity}x ${item.name}</span>
-                        <span>Php ${itemTotal.toFixed(2)}</span>
+             
+                        <span>${formatPrice(itemTotal)}</span> 
                     </div>
                     ${item.instructions ? `<div class="receipt-item-instructions">Notes: ${item.instructions}</div>` : ''}
                 </div>
@@ -255,7 +291,8 @@ document.addEventListener('DOMContentLoaded', () => {
     receiptHTML += `
         <div class="receipt-total">
             <span>TOTAL</span>
-            <span>Php ${total.toFixed(2)}</span>
+           
+            <span>${formatPrice(total)}</span>
         </div>
     `;
 
